@@ -1,0 +1,134 @@
+#*********************#
+#    Resource Group   #
+#*********************#
+
+output "environment" {
+  value = "jermaine_goldencopy"
+}
+
+output "resource_group_name" {
+ value = "jermaine_goldencopy"
+}
+
+output "location" {
+ value = "West Europe"
+}
+
+output "Tag_Environment" {
+  value = "jermaine_goldencopy" #***# "Test"
+}
+
+output "RG_Name" {
+  value = "jermaine_goldencopy" #***# "Test_Terraform2"
+}
+
+output "RG_Location" {
+  value = "West Europe" #***# "West Europe"
+}
+
+#*********************#
+#     MySQL Server    #
+#*********************#
+
+output "MySQL_Server_Name" {
+  value = "jermaine_goldencopy" #***# "azsummqatest-mysql-server"
+}
+
+output "MySQL_Server_Admin_Login" {
+  value = "jermaine_goldencopy" #***# "azsummqatest-mysql-server"
+}
+
+output "MySQL_Server_Admin_Login_Password" {
+  value = "!@£$$%^&*()QWert" #***# "!@£$$%^&*()QWert"
+}
+
+output "MySQL_Server_Version" {
+  value = "5.7" #***# "5.7"
+}
+
+output "MySQL_Server_SSLEnforcement" {
+  value = "Disabled" #***# "Disabled"
+}
+
+#*********************#
+#  MySQL Server SKU   #
+#*********************#
+
+output "MySQL_Server_SKU_Name" {
+  value = "B_Gen5_2"
+}
+
+output "MySQL_Server_SKU_Capacity" {
+  value = "2"
+}
+
+output "MySQL_Server_SKU_Tier" {
+  value = "Basic"
+}
+
+output "MySQL_Server_SKU_Family" {
+  value = "Gen5"
+}
+
+#******************************************#
+#   MySQL Server Storage Profile configs   #
+#******************************************#
+
+output "MySQL_Server_Storage_MB" {
+  value = "103424"
+}
+
+output "MySQL_Server_Storage_RetentionDays" {
+  value = "7"
+}
+
+output "MySQL_Server_Storage_GeoRedundantBackup" {
+  value = "Disabled"
+}
+
+#*********************************************#
+#   MySQL Server MySQL_Server_Firewall_Rule1  #
+#*********************************************#
+ #Summit VPN IP - 213.249.255.154
+
+output "Firewall_Rule_Name" {
+  value = "Summit_AlbionAndMill_VPN"
+}
+
+output "Firewall_Rule_IP_Address" {
+  value = "213.249.255.154"
+}
+
+
+#*******************#
+#  Storage_Account  #
+#*******************#
+
+output "storageAccount1_Name" {
+  value = "jermaine_goldencopy"
+}
+
+output "storageAccount1_Account_Tier" {
+  value = "Standard"
+}
+
+output "storageAccount1_Replication_Type" {
+  value = "GRS"
+}
+
+
+#********************#
+#  OMS_LogAnalytics  #
+#********************#
+
+output "log_analytics_workspace_name" {
+  value = "JermaineTest_goldencopy"
+}
+
+output "log_analytics_workspace_sku" {
+  value = "Free"
+}
+
+output "log_analytics_solution_name" {
+  value = "Containers"
+}

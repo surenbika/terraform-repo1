@@ -1,0 +1,84 @@
+module "global_variables" {
+    source = "../Module_Global_Variables"
+} 
+
+resource "azurerm_resource_group" "rg" {
+
+    #Resource Group
+    resource_group_name = "${module.global_variables.RG_Name}"
+    location = "${module.global_variables.RG_Location}"
+}
+
+resource "azurerm_mysql_server" "mysql_server" {
+
+    depends_on = ["azurerm_resource_group.rg"]
+
+    #Global Variables
+    tag = "${module.global_variables.Tag_Environment}"
+    resource_group_name = "${module.global_variables.RG_Name}"
+    location = "${module.global_variables.RG_Location}"
+    
+    #MySQL Server
+    mysql_server_name = "${module.global_variables.MySQL_Server_Name}" #***#
+    mysql_server_admin_login = "${module.global_variables.MySQL_Server_Admin_Login}"
+    mysql_server_admin_login_password = "${module.global_variables.MySQL_Server_Admin_Login_Password}"
+    mysql_server_version = "${module.global_variables.MySQL_Server_Version}"
+    mysql_server_ssl_enforcement = "${module.global_variables.MySQL_Server_SSLEnforcement}"
+    
+    #SKU configs
+    mysql_server_sku_name = "${module.global_variables.MySQL_Server_SKU_Name}"
+    mysql_server_sku_capacity = "${module.global_variables.MySQL_Server_SKU_Capacity}"
+    mysql_server_sku_tier = "${module.global_variables.MySQL_Server_SKU_Tier}"
+    mysql_server_sku_family = "${module.global_variables.MySQL_Server_SKU_Family}"
+
+    #Storage Profile configs
+    mysql_server_storage_mb = "${module.global_variables.MySQL_Server_Storage_MB}"
+    mysql_server_storage_retention_days = "${module.global_variables.MySQL_Server_Storage_RetentionDays}"
+    mysql_server_storage_geo_redundant_backup = "${module.global_variables.MySQL_Server_Storage_GeoRedundantBackup}"
+}
+
+resource "azurerm_mysql_firewall_rule" "firewall_rule"{
+
+    depends_on = ["azurerm_resource_group.rg", "azurerm_mysql_server.mysql_server"]
+
+    #MySQL Server Instance to set firewall rule for.
+    mysql_server_resource_group_name = "${module.global_variables.RG_Name}"
+    mysql_server_name = "${module.global_variables.MySQL_Server_Name}"
+
+    #Summit VPN IP - 213.249.255.154
+    firewall_rule_name = "${module.global_variables.Firewall_Rule_Name}"
+    firewall_rule_start_ip_address = "${module.global_variables.Firewall_Rule_IP_Address}"
+    firewall_rule_end_ip_address = "${module.global_variables.Firewall_Rule_IP_Address}"
+}
+
+resource "azurerm_storage_account" "storage"{
+    
+    depends_on = ["azurerm_resource_group.rg"]
+    
+    #Global Variables    
+    tag = "${module.global_variables.Tag_Environment}"
+    resource_group_name = "${module.global_variables.RG_Name}"
+    location = "${module.global_variables.RG_Location}"
+    
+    #Storage account
+    storageAccount1_Name = "${module.global_variables.storageAccount1_Name}"
+    storageAccount1_Account_Tier = "${module.global_variables.storageAccount1_Account_Tier}"
+    storageAccount1_Replication_Type = "${module.global_variables.storageAccount1_Replication_Type}" 
+
+}
+
+resource "azurerm_log_analytics_workspace" "logs"{
+
+    depends_on = ["azurerm_resource_group.rg"]
+    
+    #Global Variables
+    tag = "${module.global_variables.Tag_Environment}"
+    resource_group_name = "${module.global_variables.RG_Name}"
+    location = "${module.global_variables.RG_Location}"
+    
+    #OMS
+    log_analytics_workspace_name = "${module.global_variables.log_analytics_workspace_name}" 
+    log_analytics_workspace_sku = "${module.global_variables.log_analytics_workspace_sku}" 
+    log_analytics_solution_name = "${module.global_variables.log_analytics_solution_name}" 
+    
+}
