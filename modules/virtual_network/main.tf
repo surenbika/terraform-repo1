@@ -6,6 +6,11 @@ module "resource_group" {
   source = "../resource_group"
 }
 
+provider "azurerm" {
+  alias           = "k8s_env"
+  subscription_id = "${module.global_variables.subscription_id}"
+}
+
 resource "azurerm_virtual_network" "virtual_network" {
 
   depends_on = ["module.resource_group"]
@@ -17,7 +22,7 @@ resource "azurerm_virtual_network" "virtual_network" {
 
   subnet {
     name           = "${lookup(var.subnet, "name")}"
-    address_prefix = ["${lookup(var.subnet, "address_prefix")}"]
+    address_prefix = "10.90.39.0/24" #["${lookup(var.subnet, "address_space")}"]
   }
 
   tags {
