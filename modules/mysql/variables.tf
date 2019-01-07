@@ -1,16 +1,20 @@
 variable "resource_group_name" {}
 
+variable "location" {}
+
+variable "environment" {}
+
 variable "password" {}
 
 variable "mysql" {
   type = "map"
 
   default = {
-    "name"            = "jermaine_goldencopy"
-    "user"            = "jermaine_goldencopy"
+    "name"            = "jermainea"
+    "user"            = "jermainea"
     "version"         = "5.7"
     "ssl_enforcement" = "Disabled"
-    "database_name"   = "jermaine_goldencopy"
+    "database_name"   = "jermainea"
   }
 }
 
