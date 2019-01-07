@@ -22,6 +22,11 @@ DOCKER_IP=172.17.0.1/16
 # subscription_id="$1"
 subscription_id=360afc1e-3ed0-46fd-982b-038ca352b438
 
+function set_subscription() {
+    echo "Setting subscription....."
+    set_subscription=$(az account set --subscription $subscription_id)
+}
+
 echo "Azure resource script is now in action....."
 
 #config/service_principle/service_principle_config.json
@@ -75,3 +80,16 @@ function create_secrets() {
     # create_tenant_id_secret=$(az keyvault secret set --name tenantID --vault-name $resource_group_name --value $tenant_id)    
 }
 create_secrets
+
+
+function create_static_ip() {
+    echo "Creating Public Static IP......."
+
+    static_ip_config=$repo_root/config/static_ip/static_ip_config.json
+    
+    create_static_ip=$(az network public-ip create --name ${resource_group_name} --resource-group MC_${resource_group_name}_${resource_group_name}_${location} --dns-name ${resource_group_name} --allocation-method Static )
+
+    echo $create_static_ip > $static_ip_config
+    echo "Finished Creating Public Static IP....."
+}
+#create_static_ip
