@@ -10,6 +10,10 @@ set -e -o pipefail
 
 repo_root="$( cd . "$(dirname "$0")" ; pwd -P )"
 
+source "$repo_root/azure/helper.sh"
+
+declare resource_group_name environment location
+
 AKS_VERSION=1.11.5
 AKS_NODE_COUNT=3
 AKS_MACHINE_TYPE=Standard_DS2_v2
@@ -52,14 +56,16 @@ create_resource_group
 #Create Service Principal
 function create_service_principal() {
     echo "Creating Service Principal....."
-
-    mkdir $repo_root/config/service_principal
-    service_principal_config=$repo_root/config/service_principal/service_principal_config.json
     
-    create_service_principal=$(az ad sp create-for-rbac --role "Owner" --scopes "/subscriptions/${subscription_id}/resourceGroups/${resource_group_name}")
+    if [ ! -d "$repo_root/config/service_principal" ]; then
+        mkdir $repo_root/config/service_principal
+    fi
+        service_principal_config=$repo_root/config/service_principal/service_principal_config.json
+        
+        create_service_principal=$(az ad sp create-for-rbac --role "Owner" --scopes "/subscriptions/${subscription_id}/resourceGroups/${resource_group_name}")
 
-    echo $create_service_principal > $service_principal_config
-    echo "Finished Creating Service Principal....."
+        echo $create_service_principal > $service_principal_config
+        echo "Finished Creating Service Principal....."
 }
 create_service_principal
 
@@ -127,18 +133,20 @@ create_secrets
 function create_aks() {
     echo "Creating AKS....."
 
-    mkdir $repo_root/config/aks
-    aks_config=$repo_root/config/aks/aks_config.json
-    service_principal_config=$repo_root/config/service_principal/service_principal_config.json
+    if [ ! -d "$repo_root/config/aks" ]; then
+        mkdir $repo_root/config/aks
+    fi
+        aks_config=$repo_root/config/aks/aks_config.json
+        service_principal_config=$repo_root/config/service_principal/service_principal_config.json
 
-    service_principal_id=$(jq -re '.appId' "$service_principal_config")
-    client_secret=$(jq -re '.password' "$service_principal_config")
-    echo $service_principal_id
-    echo $client_secret
-    create_aks=$(az aks create --name ${resource_group_name} --resource-group ${resource_group_name} --kubernetes-version ${AKS_VERSION} --dns-name-prefix ${resource_group_name} --network-plugin azure --node-count ${AKS_NODE_COUNT} --vnet-subnet-id "/subscriptions/${subscription_id}/resourceGroups/${resource_group_name}/providers/Microsoft.Network/virtualNetworks/${resource_group_name}/subnets/${resource_group_name}" --workspace-resource-id "/subscriptions/${subscription_id}/resourceGroups/${resource_group_name}/providers/Microsoft.OperationalInsights/workspaces/${resource_group_name}" --node-vm-size ${AKS_MACHINE_TYPE} --service-cidr ${SERVICE_CIDR} --service-principal $service_principal_id --client-secret $client_secret --dns-service-ip ${DNS_SERVICE_IP} --docker-bridge-address ${DOCKER_IP} --generate-ssh-keys --enable-addons monitoring)
+        service_principal_id=$(jq -re '.appId' "$service_principal_config")
+        client_secret=$(jq -re '.password' "$service_principal_config")
+        echo $service_principal_id
+        echo $client_secret
+        create_aks=$(az aks create --name ${resource_group_name} --resource-group ${resource_group_name} --kubernetes-version ${AKS_VERSION} --dns-name-prefix ${resource_group_name} --network-plugin azure --node-count ${AKS_NODE_COUNT} --vnet-subnet-id "/subscriptions/${subscription_id}/resourceGroups/${resource_group_name}/providers/Microsoft.Network/virtualNetworks/${resource_group_name}/subnets/${resource_group_name}" --workspace-resource-id "/subscriptions/${subscription_id}/resourceGroups/${resource_group_name}/providers/Microsoft.OperationalInsights/workspaces/${resource_group_name}" --node-vm-size ${AKS_MACHINE_TYPE} --service-cidr ${SERVICE_CIDR} --service-principal $service_principal_id --client-secret $client_secret --dns-service-ip ${DNS_SERVICE_IP} --docker-bridge-address ${DOCKER_IP} --generate-ssh-keys --enable-addons monitoring)
 
-    echo $create_aks > $aks_config
-    echo "Finished Creating AKS....."
+        echo $create_aks > $aks_config
+        echo "Finished Creating AKS....."
 }
 create_aks
 
@@ -146,12 +154,14 @@ create_aks
 function create_static_ip() {
     echo "Creating Public Static IP......."
 
-    mkdir $repo_root/config/static_ip
-    static_ip_config=$repo_root/config/static_ip/static_ip_config.json
-    
-    create_static_ip=$(az network public-ip create --name ${resource_group_name} --resource-group MC_${resource_group_name}_${resource_group_name}_${location} --dns-name ${resource_group_name} --allocation-method Static )
+    if [ ! -d "$repo_root/config/static_ip" ]; then
+        mkdir $repo_root/config/static_ip
+    fi
+        static_ip_config=$repo_root/config/static_ip/static_ip_config.json
+        
+        create_static_ip=$(az network public-ip create --name ${resource_group_name} --resource-group MC_${resource_group_name}_${resource_group_name}_${location} --dns-name ${resource_group_name} --allocation-method Static )
 
-    echo $create_static_ip > $static_ip_config
-    echo "Finished Creating Public Static IP....."
+        echo $create_static_ip > $static_ip_config
+        echo "Finished Creating Public Static IP....."
 }
 create_static_ip
