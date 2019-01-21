@@ -12,7 +12,7 @@ repo_root="$( cd . "$(dirname "$0")" ; pwd -P )"
 
 source "$repo_root/azure/helper.sh"
 
-declare resource_group_name environment location
+declare RESOURCE_GROUP_NAME ENVIRONMENT LOCATION
 
 AKS_VERSION=1.11.5
 AKS_NODE_COUNT=3
@@ -28,14 +28,14 @@ DOCKER_IP=172.17.0.1/16 #DON NOT CHANGE
 #Authenticate Azure CLI
 function authenticate_cli() {
     echo "Authenticating user against Azure CLI....."
-    authenticate_cli=$(az login -u $username -p $user_password)
+    authenticate_cli=$(az login -u $USERNAME -p $USER_PASSWORD)
 }
 authenticate_cli
 
 #Set Azure Subscription
 function set_subscription() {
     echo "Setting subscription....."
-    set_subscription=$(az account set --subscription $subscription_id)
+    set_subscription=$(az account set --subscription $SUBSCRIPTION_ID)
 }
 set_subscription
 
@@ -45,7 +45,7 @@ function create_resource_group() {
 
     #Resource Group Terraform
     terraform init modules/resource_group/
-    terraform plan --out planfile -var resource_group_name=${resource_group_name} -var environment=${environment} -var location=${location} -state="$repo_root/config/resource_group/infra.tfstate" modules/resource_group/
+    terraform plan --out planfile -var resource_group_name=${RESOURCE_GROUP_NAME} -var environment=${ENVIRONMENT} -var location=${LOCATION} -state="$repo_root/config/resource_group/infra.tfstate" modules/resource_group/
     terraform apply -state-out="$repo_root/config/resource_group/infra.tfstate" planfile
     mv "$repo_root/planfile" "$repo_root/config/resource_group/"
 
@@ -62,7 +62,7 @@ function create_service_principal() {
     fi
         service_principal_config=$repo_root/config/service_principal/service_principal_config.json
         
-        create_service_principal=$(az ad sp create-for-rbac --role "Owner" --scopes "/subscriptions/${subscription_id}/resourceGroups/${resource_group_name}")
+        create_service_principal=$(az ad sp create-for-rbac --role "Owner" --scopes "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}")
 
         echo $create_service_principal > $service_principal_config
         echo "Finished Creating Service Principal....."
@@ -75,32 +75,36 @@ function main() {
     echo "Creating Infra....."
     #MySQL Terraform @s@Def34do££V24sa
     terraform init modules/mysql/
-    terraform plan --out planfile -var password=${password} -var resource_group_name=${resource_group_name} -var environment=${environment} -var location=${location} -state="$repo_root/config/mysql/infra.tfstate" modules/mysql/
+    terraform plan --out planfile -var password=${PASSWORD} -var resource_group_name=${RESOURCE_GROUP_NAME} -var environment=${ENVIRONMENT} -var location=${LOCATION} -state="$repo_root/config/mysql/infra.tfstate" modules/mysql/
     terraform apply -state-out="$repo_root/config/mysql/infra.tfstate" planfile
     mv "$repo_root/planfile" "$repo_root/config/mysql/"
 
     # rm -rf "$repo_root/planfile"
     #Storage Account Terraform
     # terraform init modules/storage_account/
-    # terraform plan --out planfile -var resource_group_name=${resource_group_name} -var environment=${environment} -var location=${location} -state="$repo_root/config/storage_account/infra.tfstate" modules/storage_account/
+    # terraform plan --out planfile -var resource_group_name=${RESOURCE_GROUP_NAME} -var environment=${ENVIRONMENT} -var location=${LOCATION} -state="$repo_root/config/storage_account/infra.tfstate" modules/storage_account/
     # terraform apply -state-out="$repo_root/config/storage_account/infra.tfstate" planfile
     # mv "$repo_root/planfile" "$repo_root/config/storage_account/"
 
     # OMS Log Analytics Terraform
     terraform init modules/oms_loganalytics/
-    terraform plan --out planfile -var resource_group_name=${resource_group_name} -var environment=${environment} -var location=${location} -var password=${password} -state="$repo_root/config/oms_loganalytics/infra.tfstate" modules/oms_loganalytics/
+    terraform plan --out planfile -var resource_group_name=${RESOURCE_GROUP_NAME} -var environment=${ENVIRONMENT} -var location=${LOCATION} -var password=${PASSWORD} -state="$repo_root/config/oms_loganalytics/infra.tfstate" modules/oms_loganalytics/
     terraform apply -state-out="$repo_root/config/oms_loganalytics/infra.tfstate" planfile
     mv "$repo_root/planfile" "$repo_root/config/oms_loganalytics/"
 
     #VNET Terraform
     terraform init modules/virtual_network/
-    terraform plan --out planfile -var resource_group_name=${resource_group_name} -var environment=${environment} -var location=${location} -var subscription_id=${subscription_id} -state="$repo_root/config/virtual_network/infra.tfstate" modules/virtual_network/
+    terraform plan --out planfile -var resource_group_name=${RESOURCE_GROUP_NAME} -var environment=${ENVIRONMENT} -var location=${LOCATION} -var subscription_id=${SUBSCRIPTION_ID} -state="$repo_root/config/virtual_network/infra.tfstate" modules/virtual_network/
     terraform apply -state-out="$repo_root/config/virtual_network/infra.tfstate" planfile
     mv "$repo_root/planfile" "$repo_root/config/virtual_network/"
 
+    object_id=$(jq -re '.appId' "$service_principal_config")
+    tenant_id=$(jq -re '.tenant' "$service_principal_config")
+
+    
     #Keyvault Terraform
     terraform init modules/keyvault/
-    terraform plan --out planfile -var resource_group_name=${resource_group_name} -var environment=${environment} -var location=${location} -var subscription_id=${subscription_id} -var tenant_id=${tenant_id} -var object_id=${object_id} -state="$repo_root/config/keyvault/infra.tfstate" modules/keyvault/
+    terraform plan --out planfile -var resource_group_name=${RESOURCE_GROUP_NAME} -var environment=${ENVIRONMENT} -var location=${LOCATION} -var subscription_id=${SUBSCRIPTION_ID} -var tenant_id=${tenant_id} -var object_id=${object_id} -state="$repo_root/config/keyvault/infra.tfstate" modules/keyvault/
     terraform apply -state-out="$repo_root/config/keyvault/infra.tfstate" planfile
     mv "$repo_root/planfile" "$repo_root/config/keyvault/"
 
@@ -117,13 +121,13 @@ function create_secrets() {
     tenant_id=$(jq -re '.tenant' "$service_principal_config")
 
     echo "Creating object_id Secrets in Keyvault..... $object_id"
-    # create_object_id_secret=$(az keyvault secret set --name objectID --vault-name $resource_group_name --value $object_id)
+    # create_object_id_secret=$(az keyvault secret set --name objectID --vault-name $RESOURCE_GROUP_NAME --value $object_id)
     
     echo "Creating client_secret in Keyvault..... $client_secret"
-    # create_client_secret=$(az keyvault secret set --name clientSecret --vault-name $resource_group_name --value $client_secret)
+    # create_client_secret=$(az keyvault secret set --name clientSecret --vault-name $RESOURCE_GROUP_NAME --value $client_secret)
     
     echo "Creating tenant_id Secrets in Keyvault..... $tenant_id"
-    # create_tenant_id_secret=$(az keyvault secret set --name tenantID --vault-name $resource_group_name --value $tenant_id)    
+    # create_tenant_id_secret=$(az keyvault secret set --name tenantID --vault-name $RESOURCE_GROUP_NAME --value $tenant_id)    
     
     echo "Finished Creating Secrets in Keyvault....."
 }
@@ -143,9 +147,9 @@ function create_aks() {
         client_secret=$(jq -re '.password' "$service_principal_config")
         echo $service_principal_id
         echo $client_secret
-        create_aks=$(az aks create --name ${resource_group_name} --resource-group ${resource_group_name} --kubernetes-version ${AKS_VERSION} --dns-name-prefix ${resource_group_name} --network-plugin azure --node-count ${AKS_NODE_COUNT} --vnet-subnet-id "/subscriptions/${subscription_id}/resourceGroups/${resource_group_name}/providers/Microsoft.Network/virtualNetworks/${resource_group_name}/subnets/${resource_group_name}" --workspace-resource-id "/subscriptions/${subscription_id}/resourceGroups/${resource_group_name}/providers/Microsoft.OperationalInsights/workspaces/${resource_group_name}" --node-vm-size ${AKS_MACHINE_TYPE} --service-cidr ${SERVICE_CIDR} --service-principal $service_principal_id --client-secret $client_secret --dns-service-ip ${DNS_SERVICE_IP} --docker-bridge-address ${DOCKER_IP} --generate-ssh-keys --enable-addons monitoring)
+        create_aks=$(az aks create --name ${RESOURCE_GROUP_NAME} --resource-group ${RESOURCE_GROUP_NAME} --kubernetes-version ${AKS_VERSION} --dns-name-prefix ${RESOURCE_GROUP_NAME} --network-plugin azure --node-count ${AKS_NODE_COUNT} --vnet-subnet-id "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.Network/virtualNetworks/${RESOURCE_GROUP_NAME}/subnets/${RESOURCE_GROUP_NAME}" --workspace-resource-id "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.OperationalInsights/workspaces/${RESOURCE_GROUP_NAME}" --node-vm-size ${AKS_MACHINE_TYPE} --service-cidr ${SERVICE_CIDR} --service-principal $service_principal_id --client-secret $client_secret --dns-service-ip ${DNS_SERVICE_IP} --docker-bridge-address ${DOCKER_IP} --generate-ssh-keys --enable-addons monitoring)
 
-        echo $create_aks > $aks_config
+        # echo $create_aks > $aks_config
         echo "Finished Creating AKS....."
 }
 create_aks
@@ -159,7 +163,7 @@ function create_static_ip() {
     fi
         static_ip_config=$repo_root/config/static_ip/static_ip_config.json
         
-        create_static_ip=$(az network public-ip create --name ${resource_group_name} --resource-group MC_${resource_group_name}_${resource_group_name}_${location} --dns-name ${resource_group_name} --allocation-method Static )
+        create_static_ip=$(az network public-ip create --name ${RESOURCE_GROUP_NAME} --resource-group MC_${RESOURCE_GROUP_NAME}_${RESOURCE_GROUP_NAME}_${LOCATION} --dns-name ${RESOURCE_GROUP_NAME} --allocation-method Static )
 
         echo $create_static_ip > $static_ip_config
         echo "Finished Creating Public Static IP....."
