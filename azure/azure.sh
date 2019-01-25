@@ -17,9 +17,10 @@ declare RESOURCE_GROUP_NAME ENVIRONMENT LOCATION
 AKS_VERSION=1.11.5
 AKS_NODE_COUNT=3
 AKS_MACHINE_TYPE=Standard_DS2_v2
-SERVICE_CIDR=10.90.60.0/24 #test need to be run to check if cidr is available
 DNS_SERVICE_IP=10.98.20.10 #DON NOT CHANGE
 DOCKER_IP=172.17.0.1/16 #DON NOT CHANGE
+START_IP_ADDRESS=213.249.255.154
+END_IP_ADDRESS=213.249.255.154
 
 ##TODO
 #Ensure all inputs are lowercase
@@ -121,13 +122,13 @@ function create_secrets() {
     tenant_id=$(jq -re '.tenant' "$service_principal_config")
 
     echo "Creating object_id Secrets in Keyvault..... $object_id"
-    # create_object_id_secret=$(az keyvault secret set --name objectID --vault-name $RESOURCE_GROUP_NAME --value $object_id)
+    # create_object_id_secret=$(az keyvault secret set --name objectID --vault-name $KEY_VAULT_NAME --value $object_id)
 
     echo "Creating client_secret in Keyvault..... $client_secret"
-    # create_client_secret=$(az keyvault secret set --name clientSecret --vault-name $RESOURCE_GROUP_NAME --value $client_secret)
+    # create_client_secret=$(az keyvault secret set --name clientSecret --vault-name $KEY_VAULT_NAME --value $client_secret)
 
     echo "Creating tenant_id Secrets in Keyvault..... $tenant_id"
-    # create_tenant_id_secret=$(az keyvault secret set --name tenantID --vault-name $RESOURCE_GROUP_NAME --value $tenant_id)
+    # create_tenant_id_secret=$(az keyvault secret set --name tenantID --vault-name $KEY_VAULT_NAME --value $tenant_id)
 
     echo "Finished Creating Secrets in Keyvault....."
 }
@@ -147,7 +148,7 @@ function create_aks() {
         client_secret=$(jq -re '.password' "$service_principal_config")
         echo $service_principal_id
         echo $client_secret
-        create_aks=$(az aks create --name ${RESOURCE_GROUP_NAME} --resource-group ${RESOURCE_GROUP_NAME} --kubernetes-version ${AKS_VERSION} --dns-name-prefix ${RESOURCE_GROUP_NAME} --network-plugin azure --node-count ${AKS_NODE_COUNT} --vnet-subnet-id "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.Network/virtualNetworks/${RESOURCE_GROUP_NAME}/subnets/${RESOURCE_GROUP_NAME}" --workspace-resource-id "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.OperationalInsights/workspaces/${RESOURCE_GROUP_NAME}" --node-vm-size ${AKS_MACHINE_TYPE} --service-cidr ${SERVICE_CIDR} --service-principal $service_principal_id --client-secret $client_secret --dns-service-ip ${DNS_SERVICE_IP} --docker-bridge-address ${DOCKER_IP} --generate-ssh-keys --enable-addons monitoring)
+        create_aks=$(az aks create --name ${AKS_NAME} --resource-group ${RESOURCE_GROUP_NAME} --kubernetes-version ${AKS_VERSION} --dns-name-prefix ${AKS_NAME} --network-plugin azure --node-count ${AKS_NODE_COUNT} --vnet-subnet-id "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.Network/virtualNetworks/${VIRTUAL_NETWORK_NAME}/subnets/${SUBNET_NAME}" --workspace-resource-id "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.OperationalInsights/workspaces/${LOG_WORKSPACE_NAME}" --node-vm-size ${AKS_MACHINE_TYPE} --service-cidr ${SERVICE_CIDR} --service-principal $service_principal_id --client-secret $client_secret --dns-service-ip ${DNS_SERVICE_IP} --docker-bridge-address ${DOCKER_IP} --generate-ssh-keys --enable-addons monitoring)
 
         # echo $create_aks > $aks_config
         echo "Finished Creating AKS....."
@@ -163,7 +164,7 @@ function create_static_ip() {
     fi
         static_ip_config=$repo_root/config/static_ip/static_ip_config.json
 
-        create_static_ip=$(az network public-ip create --name ${RESOURCE_GROUP_NAME} --resource-group MC_${RESOURCE_GROUP_NAME}_${RESOURCE_GROUP_NAME}_${LOCATION} --dns-name ${RESOURCE_GROUP_NAME} --allocation-method Static )
+        create_static_ip=$(az network public-ip create --name ${PUBLIC_IP_NAME} --resource-group ${RESOURCE_GROUP_NAME} --dns-name ${PUBLIC_IP_NAME} --allocation-method Static )
 
         echo $create_static_ip > $static_ip_config
         echo "Finished Creating Public Static IP....."

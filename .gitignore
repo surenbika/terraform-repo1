@@ -7,11 +7,13 @@
 **/.bash_history
 **/azure_credentials
 **/azure_credentials
-**/terraform-export
+**/terraform-export*
+**/service_principal_config.*
 **/connections.tf
 **/tfplan
 **/planfile
 **/terraform.tfplan
+**/config/*
 
 # .tfstate files
 **.tfstate
