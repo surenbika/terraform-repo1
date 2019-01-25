@@ -8,3 +8,5 @@
 cd terraform
 source terraform-export-<environment>
 ./azure/azure.sh
+
+Please note that before each new environment creation you will need to delete the config directory
