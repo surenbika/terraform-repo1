@@ -13,7 +13,7 @@
 **/tfplan
 **/planfile
 **/terraform.tfplan
-**/config/*
+**/config*
 
 # .tfstate files
 **.tfstate

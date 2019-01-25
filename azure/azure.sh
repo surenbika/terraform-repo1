@@ -46,9 +46,9 @@ function create_resource_group() {
 
     #Resource Group Terraform
     terraform init modules/resource_group/
-    terraform plan --out planfile -var resource_group_name=${RESOURCE_GROUP_NAME} -var environment=${ENVIRONMENT} -var location=${LOCATION} -state="$repo_root/config/resource_group/infra.tfstate" modules/resource_group/
-    terraform apply -state-out="$repo_root/config/resource_group/infra.tfstate" planfile
-    mv "$repo_root/planfile" "$repo_root/config/resource_group/"
+    terraform plan --out planfile -var resource_group_name=${RESOURCE_GROUP_NAME} -var environment=${ENVIRONMENT} -var location=${LOCATION} -state="$repo_root/config_${ENVIRONMENT}/resource_group/infra.tfstate" modules/resource_group/
+    terraform apply -state-out="$repo_root/config_${ENVIRONMENT}/resource_group/infra.tfstate" planfile
+    mv "$repo_root/planfile" "$repo_root/config_${ENVIRONMENT}/resource_group/"
 
     echo "Finished Creating Resource Group....."
 }
@@ -58,10 +58,10 @@ create_resource_group
 function create_service_principal() {
     echo "Creating Service Principal....."
 
-    if [ ! -d "$repo_root/config/service_principal" ]; then
-        mkdir $repo_root/config/service_principal
+    if [ ! -d "$repo_root/config_${ENVIRONMENT}/service_principal" ]; then
+        mkdir $repo_root/config_${ENVIRONMENT}/service_principal
     fi
-        service_principal_config=$repo_root/config/service_principal/service_principal_config.json
+        service_principal_config=$repo_root/config_${ENVIRONMENT}/service_principal/service_principal_config.json
 
         create_service_principal=$(az ad sp create-for-rbac --role "Owner" --scopes "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}")
 
@@ -76,28 +76,28 @@ function main() {
     echo "Creating Infra....."
     #MySQL Terraform @s@Def34do££V24sa
     terraform init modules/mysql/
-    terraform plan --out planfile -var password=${PASSWORD} -var resource_group_name=${RESOURCE_GROUP_NAME} -var environment=${ENVIRONMENT} -var location=${LOCATION} -state="$repo_root/config/mysql/infra.tfstate" modules/mysql/
-    terraform apply -state-out="$repo_root/config/mysql/infra.tfstate" planfile
-    mv "$repo_root/planfile" "$repo_root/config/mysql/"
+    terraform plan --out planfile -var password=${PASSWORD} -var resource_group_name=${RESOURCE_GROUP_NAME} -var environment=${ENVIRONMENT} -var location=${LOCATION} -state="$repo_root/config_${ENVIRONMENT}/mysql/infra.tfstate" modules/mysql/
+    terraform apply -state-out="$repo_root/config_${ENVIRONMENT}/mysql/infra.tfstate" planfile
+    mv "$repo_root/planfile" "$repo_root/config_${ENVIRONMENT}/mysql/"
 
     # rm -rf "$repo_root/planfile"
     #Storage Account Terraform
     # terraform init modules/storage_account/
-    # terraform plan --out planfile -var resource_group_name=${RESOURCE_GROUP_NAME} -var environment=${ENVIRONMENT} -var location=${LOCATION} -state="$repo_root/config/storage_account/infra.tfstate" modules/storage_account/
-    # terraform apply -state-out="$repo_root/config/storage_account/infra.tfstate" planfile
-    # mv "$repo_root/planfile" "$repo_root/config/storage_account/"
+    # terraform plan --out planfile -var resource_group_name=${RESOURCE_GROUP_NAME} -var environment=${ENVIRONMENT} -var location=${LOCATION} -state="$repo_root/config_${ENVIRONMENT}/storage_account/infra.tfstate" modules/storage_account/
+    # terraform apply -state-out="$repo_root/config_${ENVIRONMENT}/storage_account/infra.tfstate" planfile
+    # mv "$repo_root/planfile" "$repo_root/config_${ENVIRONMENT}/storage_account/"
 
     # OMS Log Analytics Terraform
     terraform init modules/oms_loganalytics/
-    terraform plan --out planfile -var resource_group_name=${RESOURCE_GROUP_NAME} -var environment=${ENVIRONMENT} -var location=${LOCATION} -var password=${PASSWORD} -state="$repo_root/config/oms_loganalytics/infra.tfstate" modules/oms_loganalytics/
-    terraform apply -state-out="$repo_root/config/oms_loganalytics/infra.tfstate" planfile
-    mv "$repo_root/planfile" "$repo_root/config/oms_loganalytics/"
+    terraform plan --out planfile -var resource_group_name=${RESOURCE_GROUP_NAME} -var environment=${ENVIRONMENT} -var location=${LOCATION} -var password=${PASSWORD} -state="$repo_root/config_${ENVIRONMENT}/oms_loganalytics/infra.tfstate" modules/oms_loganalytics/
+    terraform apply -state-out="$repo_root/config_${ENVIRONMENT}/oms_loganalytics/infra.tfstate" planfile
+    mv "$repo_root/planfile" "$repo_root/config_${ENVIRONMENT}/oms_loganalytics/"
 
     #VNET Terraform
     terraform init modules/virtual_network/
-    terraform plan --out planfile -var resource_group_name=${RESOURCE_GROUP_NAME} -var environment=${ENVIRONMENT} -var location=${LOCATION} -var subscription_id=${SUBSCRIPTION_ID} -state="$repo_root/config/virtual_network/infra.tfstate" modules/virtual_network/
-    terraform apply -state-out="$repo_root/config/virtual_network/infra.tfstate" planfile
-    mv "$repo_root/planfile" "$repo_root/config/virtual_network/"
+    terraform plan --out planfile -var resource_group_name=${RESOURCE_GROUP_NAME} -var environment=${ENVIRONMENT} -var location=${LOCATION} -var subscription_id=${SUBSCRIPTION_ID} -state="$repo_root/config_${ENVIRONMENT}/virtual_network/infra.tfstate" modules/virtual_network/
+    terraform apply -state-out="$repo_root/config_${ENVIRONMENT}/virtual_network/infra.tfstate" planfile
+    mv "$repo_root/planfile" "$repo_root/config_${ENVIRONMENT}/virtual_network/"
 
     object_id=$(jq -re '.appId' "$service_principal_config")
     tenant_id=$(jq -re '.tenant' "$service_principal_config")
@@ -105,15 +105,15 @@ function main() {
 
     #Keyvault Terraform
     terraform init modules/keyvault/
-    terraform plan --out planfile -var resource_group_name=${RESOURCE_GROUP_NAME} -var environment=${ENVIRONMENT} -var location=${LOCATION} -var subscription_id=${SUBSCRIPTION_ID} -var tenant_id=${tenant_id} -var object_id=${object_id} -state="$repo_root/config/keyvault/infra.tfstate" modules/keyvault/
-    terraform apply -state-out="$repo_root/config/keyvault/infra.tfstate" planfile
-    mv "$repo_root/planfile" "$repo_root/config/keyvault/"
+    terraform plan --out planfile -var resource_group_name=${RESOURCE_GROUP_NAME} -var environment=${ENVIRONMENT} -var location=${LOCATION} -var subscription_id=${SUBSCRIPTION_ID} -var tenant_id=${tenant_id} -var object_id=${object_id} -state="$repo_root/config_${ENVIRONMENT}/keyvault/infra.tfstate" modules/keyvault/
+    terraform apply -state-out="$repo_root/config_${ENVIRONMENT}/keyvault/infra.tfstate" planfile
+    mv "$repo_root/planfile" "$repo_root/config_${ENVIRONMENT}/keyvault/"
 
     echo "Finished Creating Infra....."
 }
 main
 
-#Get parameters from Service Principle config file (config/service_principle/service_principle_config.json) and create secrets in Keyvault
+#Get parameters from Service Principle config file (config_${ENVIRONMENT}/service_principle/service_principle_config.json) and create secrets in Keyvault
 function create_secrets() {
     echo "Creating Secrets in Keyvault....."
 
@@ -138,11 +138,11 @@ create_secrets
 function create_aks() {
     echo "Creating AKS....."
 
-    if [ ! -d "$repo_root/config/aks" ]; then
-        mkdir $repo_root/config/aks
+    if [ ! -d "$repo_root/config_${ENVIRONMENT}/aks" ]; then
+        mkdir $repo_root/config_${ENVIRONMENT}/aks
     fi
-        aks_config=$repo_root/config/aks/aks_config.json
-        service_principal_config=$repo_root/config/service_principal/service_principal_config.json
+        aks_config=$repo_root/config_${ENVIRONMENT}/aks/aks_config.json
+        service_principal_config=$repo_root/config_${ENVIRONMENT}/service_principal/service_principal_config.json
 
         service_principal_id=$(jq -re '.appId' "$service_principal_config")
         client_secret=$(jq -re '.password' "$service_principal_config")
@@ -159,10 +159,10 @@ create_aks
 function create_static_ip() {
     echo "Creating Public Static IP......."
 
-    if [ ! -d "$repo_root/config/static_ip" ]; then
-        mkdir $repo_root/config/static_ip
+    if [ ! -d "$repo_root/config_${ENVIRONMENT}/static_ip" ]; then
+        mkdir $repo_root/config_${ENVIRONMENT}/static_ip
     fi
-        static_ip_config=$repo_root/config/static_ip/static_ip_config.json
+        static_ip_config=$repo_root/config_${ENVIRONMENT}/static_ip/static_ip_config.json
 
         create_static_ip=$(az network public-ip create --name ${PUBLIC_IP_NAME} --resource-group ${RESOURCE_GROUP_NAME} --dns-name ${PUBLIC_IP_NAME} --allocation-method Static )
 
