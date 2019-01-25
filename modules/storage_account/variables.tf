@@ -10,7 +10,7 @@ variable "storage" {
   type = "map"
 
   default = {
-    "name"                      = "jermainea"
+    "name"                      = "vanilla-dev-poc-storage-account"
     "account_tier"              = "Standard"
     "account_replication_type"  = "GRS"
   }

@@ -17,12 +17,12 @@ declare RESOURCE_GROUP_NAME ENVIRONMENT LOCATION
 AKS_VERSION=1.11.5
 AKS_NODE_COUNT=3
 AKS_MACHINE_TYPE=Standard_DS2_v2
-SERVICE_CIDR=10.90.50.0/24 #test need to be run to check if cidr is available
+SERVICE_CIDR=10.90.60.0/24 #test need to be run to check if cidr is available
 DNS_SERVICE_IP=10.98.20.10 #DON NOT CHANGE
 DOCKER_IP=172.17.0.1/16 #DON NOT CHANGE
 
 ##TODO
-#Ensure all inputs are lowercase 
+#Ensure all inputs are lowercase
 
 
 #Authenticate Azure CLI
@@ -56,12 +56,12 @@ create_resource_group
 #Create Service Principal
 function create_service_principal() {
     echo "Creating Service Principal....."
-    
+
     if [ ! -d "$repo_root/config/service_principal" ]; then
         mkdir $repo_root/config/service_principal
     fi
         service_principal_config=$repo_root/config/service_principal/service_principal_config.json
-        
+
         create_service_principal=$(az ad sp create-for-rbac --role "Owner" --scopes "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}")
 
         echo $create_service_principal > $service_principal_config
@@ -101,7 +101,7 @@ function main() {
     object_id=$(jq -re '.appId' "$service_principal_config")
     tenant_id=$(jq -re '.tenant' "$service_principal_config")
 
-    
+
     #Keyvault Terraform
     terraform init modules/keyvault/
     terraform plan --out planfile -var resource_group_name=${RESOURCE_GROUP_NAME} -var environment=${ENVIRONMENT} -var location=${LOCATION} -var subscription_id=${SUBSCRIPTION_ID} -var tenant_id=${tenant_id} -var object_id=${object_id} -state="$repo_root/config/keyvault/infra.tfstate" modules/keyvault/
@@ -122,13 +122,13 @@ function create_secrets() {
 
     echo "Creating object_id Secrets in Keyvault..... $object_id"
     # create_object_id_secret=$(az keyvault secret set --name objectID --vault-name $RESOURCE_GROUP_NAME --value $object_id)
-    
+
     echo "Creating client_secret in Keyvault..... $client_secret"
     # create_client_secret=$(az keyvault secret set --name clientSecret --vault-name $RESOURCE_GROUP_NAME --value $client_secret)
-    
+
     echo "Creating tenant_id Secrets in Keyvault..... $tenant_id"
-    # create_tenant_id_secret=$(az keyvault secret set --name tenantID --vault-name $RESOURCE_GROUP_NAME --value $tenant_id)    
-    
+    # create_tenant_id_secret=$(az keyvault secret set --name tenantID --vault-name $RESOURCE_GROUP_NAME --value $tenant_id)
+
     echo "Finished Creating Secrets in Keyvault....."
 }
 create_secrets
@@ -162,7 +162,7 @@ function create_static_ip() {
         mkdir $repo_root/config/static_ip
     fi
         static_ip_config=$repo_root/config/static_ip/static_ip_config.json
-        
+
         create_static_ip=$(az network public-ip create --name ${RESOURCE_GROUP_NAME} --resource-group MC_${RESOURCE_GROUP_NAME}_${RESOURCE_GROUP_NAME}_${LOCATION} --dns-name ${RESOURCE_GROUP_NAME} --allocation-method Static )
 
         echo $create_static_ip > $static_ip_config

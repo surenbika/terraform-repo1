@@ -10,7 +10,7 @@ variable "logs" {
   type = "map"
 
   default = {
-    "name"  = "jermainea"
+    "name"  = "vanilla-dev-poc-oms-log-analytics"
     "sku"   = "Free"
   }
 }

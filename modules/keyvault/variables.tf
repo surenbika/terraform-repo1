@@ -8,7 +8,7 @@ variable "keyvault_name" {
   type = "map"
 
   default = {
-    "name"                            = "jermainea"
+    "name"                            = "vanilla-dev-poc-keyvault"
     "enabled_for_template_deployment" = "true"
   }
 }
