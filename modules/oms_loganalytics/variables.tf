@@ -4,14 +4,12 @@ variable "location" {}
 
 variable "environment" {}
 
-#variable "password" {}
-
 variable "logs" {
   type = "map"
 
   default = {
-    "name"  = "jermainea"
-    "sku"   = "Free"
+    "name"  = "vanilladevomsloganalytics"
+    "sku"   = "PerNode"
   }
 }
 
@@ -20,8 +18,6 @@ variable "logs_solution" {
 
   default = {
     "solution_name"         = "Containers"
-#    "workspace_name"        = "jermainea"
-#    "workspace_resource_id" = "jermainea"
     "publisher"             = "Microsoft"
     "product"               = "OMSGallery/Containers"
   }

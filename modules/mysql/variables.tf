@@ -10,11 +10,11 @@ variable "mysql" {
   type = "map"
 
   default = {
-    "name"            = "jermainea"
-    "user"            = "jermainea"
+    "name"            = "vanilladevmysql"
+    "user"            = "devadmin"
     "version"         = "5.7"
     "ssl_enforcement" = "Disabled"
-    "database_name"   = "jermainea"
+    "database_name"   = "devadmindb"
   }
 }
 

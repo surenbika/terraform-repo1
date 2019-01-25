@@ -4,13 +4,11 @@ variable "location" {}
 
 variable "environment" {}
 
-#variable "password" {}
-
 variable "storage" {
   type = "map"
 
   default = {
-    "name"                      = "jermainea"
+    "name"                      = "vanilladevstorageaccount"
     "account_tier"              = "Standard"
     "account_replication_type"  = "GRS"
   }
