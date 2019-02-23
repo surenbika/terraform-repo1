@@ -1,5 +1,7 @@
 # Project to create environment in azure
 
+1. Install unzip, jq, terraform cli and azure cli
+
 1. Update default variable file for each module in terraform/modules for required environment
 
 2. Create terraform/terraform-export-<environment_name> for required environment to include appropriate values as follows:
